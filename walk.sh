@@ -1,38 +1,40 @@
 #!/bin/bash
 
-function setBoolean() {
-  local v
-  if (( $# != 2 )); then
-     echo "Err: setBoolean usage" 1>&2; exit 1 ;
-  fi
-
-  case "$2" in
-    TRUE) v=true ;;
-    FALSE) v=false ;;
-    *) echo "Err: Unknown boolean value \"$2\"" 1>&2; exit 1 ;;
-   esac
-
-   eval $1=$v
+die() {
+  echo "$*" 1>&2
+  exit 1
 }
 
-p=false
-if ! [ -z "$2" ]; then
-    setBoolean p "$2"
-fi
+validate_args() {
+  if [[ -z $src ]]; then
+    die "Missing parameter --src"
+  elif [[ -z $pull_it ]]; then
+    die "Missing parameter --pull_it"
+  fi
+}
 
+while [ $# -gt 0 ]; do
+  if [[ $1 == "--"* ]]; then
+    v="${1/--/}"
+    declare "$v"="$2"
+    shift
+  fi
+  shift
+done
 
-cd $1
-for i in $1/** ; do
+validate_args
+
+cd $src
+for i in $src/**; do
   if [ -d "$i" ]; then
     cd $i
-	if [ -d .git ]; then
-	    git remote -v | awk 'NR==1{print $2}'
-      if $p; then
-          git status
-          git pull
+    if [ -d .git ]; then
+      git remote -v | awk 'NR==1{print $2}'
+      if $pull_it == 'true'; then
+        git status
+        git pull
       fi
-	fi
+    fi
     cd ..
-
   fi
 done
