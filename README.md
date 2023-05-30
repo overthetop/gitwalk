@@ -1,1 +1,2 @@
-./walk.sh --src ./ --pull_it true
+./walk.sh --clone false --clone_src ./source.txt --pull true
+

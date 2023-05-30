@@ -6,10 +6,12 @@ die() {
 }
 
 validate_args() {
-  if [[ -z $src ]]; then
-    die "Missing parameter --src"
-  elif [[ -z $pull_it ]]; then
-    die "Missing parameter --pull_it"
+  if [[ -z $clone ]]; then
+    die "Missing parameter --clone"
+  elif [[ -z $clone_src ]]; then
+    die "Missing parameter --clone_src"
+  elif [[ -z $pull ]]; then
+    die "Missing parameter --pull"
   fi
 }
 
@@ -24,13 +26,19 @@ done
 
 validate_args
 
-cd $src
-for i in $src/**; do
+if $clone == 'true'; then
+  while IFS= read -r line
+  do
+    echo $line ; git clone $line;
+  done < "$clone_src"
+fi
+
+for i in ./**; do
   if [ -d "$i" ]; then
     cd $i
     if [ -d .git ]; then
       git remote -v | awk 'NR==1{print $2}'
-      if $pull_it == 'true'; then
+      if $pull == 'true'; then
         git status
         git pull
       fi
